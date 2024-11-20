@@ -27,6 +27,16 @@
     <Compile Include="main.py" />
     <Compile Include="data_preprocessor.py" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\Youtube01-Psy.csv" />
+    <Content Include="data\Youtube02-KatyPerry.csv" />
+    <Content Include="data\Youtube03-LMFAO.csv" />
+    <Content Include="data\Youtube04-Eminem.csv" />
+    <Content Include="data\Youtube05-Shakira.csv" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in
