@@ -26,6 +26,7 @@
     <Compile Include="evaluator.py" />
     <Compile Include="main.py" />
     <Compile Include="data_preprocessor.py" />
+    <Compile Include="test.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="data\" />
