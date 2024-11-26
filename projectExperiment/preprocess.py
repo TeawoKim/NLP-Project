@@ -3,11 +3,12 @@ import os
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer, PorterStemmer
 import re
 
 # download all required corpus
 nltk.download('punkt_tab')
+nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
@@ -48,34 +49,40 @@ def pre_precess(df: pd.DataFrame):
 
     print("\nshape of the dataframe:\n", df.shape)
 
-    # lowercase all content
-    df["CONTENT"] = df["CONTENT"].str.lower()
-
-    # remove html tags: TODO not sure whether we need ot do it because some comments have links and it's a good way to detect spam
-    remove_html_tags = re.compile(r'<[/]?[a-zA-Z0-9\s]+[/]?>')
-    df["CONTENT"] = [re.sub(remove_html_tags, '', c) for c in df["CONTENT"]]
-
-    # replaced escapled characters
-    df["CONTENT"] = df["CONTENT"].str.replace('&#39;', '\'')
-    df["CONTENT"] = df["CONTENT"].str.replace("&lt;", "<")
-    df["CONTENT"] = df["CONTENT"].str.replace("&gt;", ">")
-
-    # tokenize all content
-    df["tokens"] = [word_tokenize(c) for c in df["CONTENT"]]
-
-    stop_symbols = [
-        '!', '?', '.', ',', '-', '{', '}', '(', ')', '[', ']', '<', '>'
-    ]
-    en_stopwords = stopwords.words("english") + stop_symbols
-
-    # remove all stop words from content
-    df["tokens"] = [[word for word in tokens if word not in en_stopwords] for tokens in df["tokens"]]
-
-    # lemmatize all tokens
     lemmatizer = WordNetLemmatizer()
-    df["tokens"] = [[lemmatizer.lemmatize(word) for word in tokens] for tokens in df["tokens"]]
+    stemmer = PorterStemmer()
+    en_stopwords = stopwords.words("english")
+    remove_html_tags = re.compile(r'<[/]?[a-zA-Z0-9\s]+[/]?>')
 
-    print("\nfirst 3 rows:\n", df["tokens"].head(10))
+    def clear_tokens(comment: str):
+        # lowercase all content
+        l_comment = comment.lower()
+
+        # remove html tags
+        cleared_comment = re.sub(remove_html_tags, '', l_comment)
+
+        # replaced escapled characters
+        cleared_comment = cleared_comment.replace('&#39;', '\'')
+        cleared_comment = cleared_comment.replace("&lt;", "<")
+        cleared_comment = cleared_comment.replace("&gt;", ">")
+
+        # convert comments in list of tokens
+        tokens = word_tokenize(cleared_comment)
+
+        # filter stopwords, smiley, numbers and punctuation
+        tokens = [t for t in tokens if t.isalpha() and t not in en_stopwords]
+
+        # lemmatize all tokens
+        lemmas = [lemmatizer.lemmatize(token) for token in tokens]
+
+        # stemming all tokens
+        stemmed_tokens = [stemmer.stem(lemma) for lemma in lemmas]
+
+        return ' '.join(stemmed_tokens)
+
+    df['preprocessed_comments'] = df['CONTENT'].apply(clear_tokens)
+
+    print("\nfirst 3 rows:\n", df["preprocessed_comments"].head(15))
 
     return df
 
